@@ -107,16 +107,17 @@ Route::get('part2/test4', function(){
 
     $rootPassword = md5("secret");
 
-    $insert_query = "INSERT INTO users (username, password) VALUES ('root', '?')";
-    $pdo->prepare($insert_query, [$rootPassword]);
-    $pdo->execute($insert_query);
-
-    $select_query = "SELECT * FROM users WHERE usernam = ? AND password = ?";
-
-    $statement = $pdo->prepare($select_query, [$username, $password]);
+    $insert_query = "";
+    $stmt = $pdo->prepare("INSERT INTO users (username, password) VALUES ('root', :password)");
+    $stmt->bindParam(":password", $rootPassword);
     $stmt->execute();
 
-    if (count($statement->fetchAll())) {
+    $stmt = $pdo->prepare("SELECT * FROM users WHERE username = :username AND password = :pass");
+    $stmt->bindParam(":username", $username);
+    $stmt->bindParam(":pass", $password);
+    $stmt->execute();
+
+    if (count($stmt->fetchAll())) {
         echo "Access granted to $username!<br>\n";
     } else {
         echo "Access denied for $username!<br>\n"; 
